@@ -1,10 +1,1291 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-   <title>我的第一个网页 | 编程狮（w3cschool.cn）</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>奶茶点单系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: #f8f4e9;
+            color: #333;
+            display: flex;
+        }
+
+        /* 左侧分类导航 */
+        .category-nav {
+            width: 120px;
+            background-color: white;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            padding: 20px 0;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        .category-item {
+            padding: 12px 15px;
+            margin: 5px 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            color: #666;
+            background-color: #f0f0f0;
+        }
+
+        .category-item.active {
+            background-color: #ff4e79;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* 搜索框样式 */
+        .search-container {
+            position: fixed;
+            top: 0;
+            left: 120px;
+            right: 0;
+            background-color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            position: relative;
+            max-width: 500px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: #ff4e79;
+            box-shadow: 0 0 5px rgba(255, 78, 121, 0.3);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 101;
+            display: none;
+        }
+
+        .search-result-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .search-result-item:hover {
+            background-color: #f9f9f9;
+        }
+
+        .search-result-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .search-result-price {
+            color: #ff4e79;
+            font-size: 14px;
+        }
+
+        .search-result-category {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .no-results {
+            padding: 15px;
+            text-align: center;
+            color: #888;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-x: hidden;
+            margin-top: 60px; /* 为搜索框留出空间 */
+        }
+
+        /* 奶茶分类区块 */
+        .category-section {
+            padding: 20px 15px;
+            margin-bottom: 30px;
+        }
+
+        .category-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ff4e79;
+            display: flex;
+            align-items: center;
+        }
+
+        .category-title .icon {
+            margin-right: 10px;
+        }
+
+        .category-description {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        /* 奶茶网格布局 */
+        .tea-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+        }
+
+        .tea-item {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .tea-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .tea-name {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 16px;
+            line-height: 1.3;
+        }
+
+        .tea-price {
+            color: #ff4e79;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .tea-default-options {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 12px;
+        }
+
+        .order-btn {
+            background-color: #ff4e79;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        .order-btn:hover {
+            background-color: #e03d66;
+        }
+
+        /* 选项弹窗 */
+        .options-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .options-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .options-container {
+            background-color: white;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 12px;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+
+        .options-modal.active .options-container {
+            transform: translateY(0);
+        }
+
+        .options-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            position: relative;
+            text-align: center;
+        }
+
+        .tea-image {
+            width: 100%;
+            height: 150px;
+            background-color: #f5f5f5;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .options-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .options-price {
+            color: #ff4e79;
+            font-weight: bold;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .default-options {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .favorite-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #ccc;
+            cursor: pointer;
+        }
+
+        .favorite-btn.active {
+            color: #ff4e79;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .options-body {
+            padding: 15px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .option-group {
+            margin-bottom: 20px;
+        }
+
+        .option-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .option-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .option-item {
+            border: 1px solid #ddd;
+            border-radius: 16px;
+            padding: 8px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option-item:hover {
+            border-color: #ff4e79;
+        }
+
+        .option-item.selected {
+            background-color: #ff4e79;
+            color: white;
+            border-color: #ff4e79;
+        }
+
+        .option-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .recommend-tag {
+            background-color: #ff4e79;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 5px;
+        }
+
+        .options-footer {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: center;
+        }
+
+        .confirm-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 16px;
+            width: 100%;
+            max-width: 200px;
+        }
+
+        .confirm-btn:hover {
+            background-color: #3e8e41;
+        }
+
+        /* 购物车弹窗 */
+        .cart-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .cart-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .cart-container {
+            background-color: white;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            position: relative;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .cart-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .cart-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: center;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .cart-item-options {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .cart-item-price {
+            color: #ff4e79;
+            font-weight: bold;
+        }
+
+        .cart-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .cart-item-btn {
+            background: none;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .cart-item-btn.edit {
+            color: #ff4e79;
+            border-color: #ff4e79;
+        }
+
+        .cart-item-btn.delete {
+            color: #f44336;
+            border-color: #f44336;
+        }
+
+        .cart-item-btn:hover {
+            opacity: 0.8;
+        }
+
+        .cart-footer {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-total {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .cart-checkout {
+            background-color: #ff4e79;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* 底部订单栏 */
+        .order-bar {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            left: 120px;
+            background-color: #fff;
+            padding: 12px 20px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-total {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .cart-btn {
+            background-color: #ff4e79;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .checkout-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* 新增通知样式 */
+        .added-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.3s, top 0.3s;
+            z-index: 1000;
+        }
+
+        .added-notification.show {
+            opacity: 1;
+            top: 40px;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .category-nav {
+                width: 100%;
+                height: auto;
+                position: sticky;
+                top: 0;
+                display: flex;
+                flex-wrap: wrap;
+                padding: 10px;
+                z-index: 100;
+            }
+
+            .category-item {
+                margin: 5px;
+                font-size: 12px;
+                padding: 8px 10px;
+            }
+
+            .search-container {
+                left: 0;
+                padding: 10px;
+                top: 50px; /* 移动端分类导航高度 */
+            }
+
+            .main-content {
+                margin-top: 100px; /* 移动端搜索框和分类导航高度 */
+            }
+
+            .order-bar {
+                left: 0;
+            }
+        }
+    </style>
 </head>
 <body>
-   <h1>欢迎来到编程狮！</h1>
-   <p>我正在编程狮学习HTML！🐱💻</p>
+    <div class="category-nav" id="categoryNav">
+        <!-- 分类导航将通过JS动态生成 -->
+    </div>
+
+    <!-- 新增搜索框 -->
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="搜索奶茶名称...">
+            <div class="search-icon">🔍</div>
+            <div class="search-results" id="searchResults"></div>
+        </div>
+    </div>
+
+    <div class="main-content" id="teaSections">
+        <!-- 奶茶分类区块将通过JS动态生成 -->
+    </div>
+
+    <!-- 选项弹窗 -->
+    <div class="options-modal" id="optionsModal">
+        <div class="options-container">
+            <div class="options-header">
+                <div class="tea-image">产品图片仅供参考</div>
+                <div class="options-title" id="modalTeaName">奶茶名称</div>
+                <div class="options-price" id="modalTeaPrice">¥0</div>
+                <div class="default-options" id="defaultOptions">中杯 / 标准冰 / 不另外加糖</div>
+                <button class="favorite-btn" id="favoriteBtn">♥</button>
+                <div class="close-btn" id="closeOptionsModal">×</div>
+            </div>
+            <div class="options-body" id="optionsBody">
+                <!-- 选项内容将通过JS动态生成 -->
+            </div>
+            <div class="options-footer">
+                <button class="confirm-btn" id="confirmOptions">选好了</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 购物车弹窗 -->
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-container">
+            <div class="cart-header">
+                我的购物车
+                <div class="cart-close" id="closeCartModal">×</div>
+            </div>
+            <div class="cart-body" id="cartBody">
+                <!-- 购物车内容将通过JS动态生成 -->
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total">总价: ¥<span id="cartTotalPrice">0</span></div>
+                <button class="cart-checkout" id="cartCheckoutBtn">去结算</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="order-bar">
+        <div class="order-total">总价: ¥<span id="totalPrice">0</span></div>
+        <div>
+            <button class="cart-btn" id="viewCartBtn">查看购物车</button>
+            <button class="checkout-btn" id="checkoutBtn">去结算</button>
+        </div>
+    </div>
+
+    <!-- 添加商品通知元素 -->
+    <div class="added-notification" id="addedNotification">已添加到订单</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 从后端获取菜单数据
+            fetch('/api/menu')
+                .then(response => response.json())
+                .then(data => {
+                    const categories = data.categories;
+                    const menu = data.menu;
+                    const priceConfig = data.price_config;
+                    let orderItems = [];
+                    let totalPrice = 0;
+                    let currentTea = null;
+                    let isFavorite = false;
+                    let allTeas = []; // 存储所有奶茶信息用于搜索
+
+                    // 获取DOM元素
+                    const searchInput = document.getElementById('searchInput');
+                    const searchResults = document.getElementById('searchResults');
+                    const optionsModal = document.getElementById('optionsModal');
+                    const closeOptionsModal = document.getElementById('closeOptionsModal');
+                    const confirmOptions = document.getElementById('confirmOptions');
+                    const modalTeaName = document.getElementById('modalTeaName');
+                    const modalTeaPrice = document.getElementById('modalTeaPrice');
+                    const optionsBody = document.getElementById('optionsBody');
+                    const defaultOptions = document.getElementById('defaultOptions');
+                    const favoriteBtn = document.getElementById('favoriteBtn');
+                    const addedNotification = document.getElementById('addedNotification');
+                    const cartModal = document.getElementById('cartModal');
+                    const closeCartModal = document.getElementById('closeCartModal');
+                    const viewCartBtn = document.getElementById('viewCartBtn');
+                    const cartBody = document.getElementById('cartBody');
+                    const cartTotalPrice = document.getElementById('cartTotalPrice');
+                    const cartCheckoutBtn = document.getElementById('cartCheckoutBtn');
+                    const checkoutBtn = document.getElementById('checkoutBtn');
+                    const totalPriceElement = document.getElementById('totalPrice');
+
+                    // 收集所有奶茶信息用于搜索
+                    Object.keys(categories).forEach(categoryKey => {
+                        const category = categories[categoryKey];
+                        category.items.forEach(teaName => {
+                            if (menu[teaName]) {
+                                allTeas.push({
+                                    name: teaName,
+                                    price: menu[teaName].price,
+                                    category: category.name,
+                                    categoryKey: categoryKey
+                                });
+                            }
+                        });
+                    });
+
+                    // 搜索功能实现
+                    searchInput.addEventListener('input', function() {
+                        const keyword = this.value.trim().toLowerCase();
+                        if (keyword.length === 0) {
+                            searchResults.style.display = 'none';
+                            return;
+                        }
+
+                        const results = allTeas.filter(tea =>
+                            tea.name.toLowerCase().includes(keyword)
+                        );
+
+                        displaySearchResults(results);
+                    });
+
+                    // 显示搜索结果
+                    function displaySearchResults(results) {
+                        searchResults.innerHTML = '';
+
+                        if (results.length === 0) {
+                            searchResults.innerHTML = '<div class="no-results">没有找到匹配的奶茶</div>';
+                            searchResults.style.display = 'block';
+                            return;
+                        }
+
+                        results.forEach(tea => {
+                            const item = document.createElement('div');
+                            item.className = 'search-result-item';
+                            item.innerHTML = `
+                                <div class="search-result-name">${tea.name}</div>
+                                <div class="search-result-price">¥${tea.price}</div>
+                                <div class="search-result-category">${tea.category}</div>
+                            `;
+                            item.addEventListener('click', () => {
+                                // 滚动到对应分类并高亮
+                                scrollToCategory(tea.categoryKey);
+                                // 显示选项弹窗
+                                showOptionsModal(tea.name, tea.price);
+                                // 清空搜索
+                                searchInput.value = '';
+                                searchResults.style.display = 'none';
+                            });
+                            searchResults.appendChild(item);
+                        });
+
+                        searchResults.style.display = 'block';
+                    }
+
+                    // 点击页面其他地方关闭搜索结果
+                    document.addEventListener('click', function(e) {
+                        if (e.target !== searchInput && !searchInput.contains(e.target) &&
+                            e.target !== searchResults && !searchResults.contains(e.target)) {
+                            searchResults.style.display = 'none';
+                        }
+                    });
+
+                    // 按照要求的顺序生成分类导航
+                    const categoryOrder = [
+                        'yidiandian',   // 一点点
+                        'mixue',        // 蜜雪冰城
+                        'guming',       // 古茗
+                        'chabaidao',    // 茶百道
+                        'chenwendin',   // 陈文鼎
+                        'xicha',        // 喜茶
+                        'hushangayi',   // 沪上阿姨
+                        'ruixing'       // 瑞幸
+                    ];
+
+                    const categoryNav = document.getElementById('categoryNav');
+                    categoryOrder.forEach(categoryKey => {
+                        if (categories[categoryKey]) {
+                            const category = categories[categoryKey];
+                            const navItem = document.createElement('div');
+                            navItem.className = 'category-item';
+                            navItem.textContent = category.name;
+                            navItem.dataset.category = categoryKey;
+                            navItem.addEventListener('click', () => {
+                                scrollToCategory(categoryKey);
+                            });
+                            categoryNav.appendChild(navItem);
+                        }
+                    });
+
+                    // 生成奶茶分类区块
+                    const teaSections = document.getElementById('teaSections');
+                    categoryOrder.forEach(categoryKey => {
+                        if (categories[categoryKey]) {
+                            const category = categories[categoryKey];
+
+                            const section = document.createElement('div');
+                            section.className = 'category-section';
+                            section.id = `section-${categoryKey}`;
+
+                            const title = document.createElement('h2');
+                            title.className = 'category-title';
+                            title.innerHTML = `<span class="icon">${getCategoryIcon(category.name)}</span>${category.name}`;
+
+                            const desc = document.createElement('p');
+                            desc.className = 'category-description';
+                            desc.textContent = category.description;
+
+                            const grid = document.createElement('div');
+                            grid.className = 'tea-grid';
+
+                            category.items.forEach(teaName => {
+                                if (menu[teaName]) {
+                                    const teaItem = document.createElement('div');
+                                    teaItem.className = 'tea-item';
+                                    teaItem.innerHTML = `
+                                        <div class="tea-name">${teaName}</div>
+                                        <div class="tea-price">¥${menu[teaName].price}</div>
+                                        <div class="tea-default-options">中杯 / 标准冰 / 不另外加糖</div>
+                                        <button class="order-btn" data-tea="${teaName}" data-price="${menu[teaName].price}">加入订单</button>
+                                    `;
+                                    grid.appendChild(teaItem);
+                                }
+                            });
+
+                            section.appendChild(title);
+                            section.appendChild(desc);
+                            section.appendChild(grid);
+                            teaSections.appendChild(section);
+                        }
+                    });
+
+                    // 初始化Intersection Observer
+                    const navItems = document.querySelectorAll('.category-item');
+                    const sections = document.querySelectorAll('.category-section');
+
+                    const observer = new IntersectionObserver(
+                        (entries) => {
+                            entries.forEach(entry => {
+                                if (entry.isIntersecting) {
+                                    const category = entry.target.id.split('-')[1];
+                                    updateActiveNav(category);
+                                }
+                            });
+                        },
+                        {
+                            threshold: 0.4,
+                            rootMargin: '0px 0px -50% 0px'
+                        }
+                    );
+
+                    sections.forEach(section => {
+                        observer.observe(section);
+                    });
+
+                    // 默认激活第一个分类（一点点）
+                    if (navItems.length > 0) {
+                        navItems[0].classList.add('active');
+                    }
+
+                    // 滚动到指定分类
+                    function scrollToCategory(categoryKey) {
+                        const section = document.getElementById(`section-${categoryKey}`);
+                        if (section) {
+                            section.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+
+                    // 更新活动导航项
+                    function updateActiveNav(activeCategory) {
+                        navItems.forEach(item => {
+                            item.classList.toggle(
+                                'active',
+                                item.dataset.category === activeCategory
+                            );
+                        });
+                    }
+
+                    // 获取分类图标
+                    function getCategoryIcon(categoryName) {
+                        const icons = {
+                            '一点点': '🍵',
+                            '古茗': '🧋',
+                            '蜜雪冰城': '❄️',
+                            '瑞幸': '☕',
+                            '陈文鼎': '🫖',
+                            '沪上阿姨': '👵',
+                            '喜茶': '🍓',
+                            '茶百道': '🐼'
+                        };
+                        return icons[categoryName] || '🍹';
+                    }
+
+                    // 显示选项弹窗
+                    function showOptionsModal(teaName, basePrice) {
+                        currentTea = {
+                            name: teaName,
+                            basePrice: parseFloat(basePrice),
+                            size: '中杯',
+                            sizePrice: 0,
+                            ice: '标准冰',
+                            sugar: '不另外加糖',
+                            base: '原配基底',
+                            isEditMode: false,
+                            editIndex: -1
+                        };
+
+                        modalTeaName.textContent = teaName;
+                        modalTeaPrice.textContent = `¥${basePrice}`;
+                        defaultOptions.textContent = '中杯 / 标准冰 / 不另外加糖';
+                        isFavorite = false;
+                        favoriteBtn.classList.remove('active');
+
+                        // 生成选项内容
+                        optionsBody.innerHTML = `
+                            <div class="option-group">
+                                <div class="option-title">杯型</div>
+                                <div class="option-items">
+                                    <div class="option-item selected" data-type="size" data-value="中杯" data-price="0">中杯</div>
+                                    <div class="option-item" data-type="size" data-value="大杯" data-price="3">大杯 (+¥3)</div>
+                                </div>
+                            </div>
+                            <div class="option-group">
+                                <div class="option-title">冰度</div>
+                                <div class="option-items">
+                                    <div class="option-item selected" data-type="ice" data-value="标准冰">标准冰 <span class="recommend-tag">推荐</span></div>
+                                    <div class="option-item" data-type="ice" data-value="少冰">少冰</div>
+                                    <div class="option-item" data-type="ice" data-value="去冰">去冰</div>
+                                    <div class="option-item" data-type="ice" data-value="常温">常温</div>
+                                    <div class="option-item" data-type="ice" data-value="热">热</div>
+                                </div>
+                            </div>
+                            <div class="option-group">
+                                <div class="option-title">糖度</div>
+                                <div class="option-items">
+                                    <div class="option-item" data-type="sugar" data-value="三分糖">三分糖 <span class="recommend-tag">推荐</span></div>
+                                    <div class="option-item selected" data-type="sugar" data-value="不另外加糖">不另外加糖</div>
+                                    <div class="option-item" data-type="sugar" data-value="五分糖">五分糖</div>
+                                    <div class="option-item" data-type="sugar" data-value="七分糖">七分糖</div>
+                                    <div class="option-item" data-type="sugar" data-value="全糖">全糖</div>
+                                </div>
+                            </div>
+                            <div class="option-group">
+                                <div class="option-title">更改基底</div>
+                                <div class="option-items">
+                                    <div class="option-item selected" data-type="base" data-value="原配基底" data-price="0">原配基底</div>
+                                    <div class="option-item" data-type="base" data-value="四季春茶" data-price="0">改四季春茶 ￥0</div>
+                                    <div class="option-item" data-type="base" data-value="重焙乌龙茶" data-price="0">改重焙乌龙茶 ￥0</div>
+                                </div>
+                            </div>
+                        `;
+
+                        optionsModal.classList.add('active');
+                    }
+
+                    // 关闭选项弹窗
+                    function closeModal() {
+                        optionsModal.classList.remove('active');
+                    }
+
+                    // 更新默认选项显示
+                    function updateDefaultOptionsDisplay() {
+                        defaultOptions.textContent = `${currentTea.size} / ${currentTea.ice} / ${currentTea.sugar}`;
+                    }
+
+                    // 显示购物车弹窗
+                    function showCartModal() {
+                        updateCartDisplay();
+                        cartModal.classList.add('active');
+                    }
+
+                    // 关闭购物车弹窗
+                    function closeCartModalFunc() {
+                        cartModal.classList.remove('active');
+                    }
+
+                    // 更新购物车显示
+                    function updateCartDisplay() {
+                        cartBody.innerHTML = '';
+
+                        if (orderItems.length === 0) {
+                            cartBody.innerHTML = '<div class="empty-cart">购物车是空的，快去添加商品吧~</div>';
+                            return;
+                        }
+
+                        orderItems.forEach((item, index) => {
+                            const cartItem = document.createElement('div');
+                            cartItem.className = 'cart-item';
+                            cartItem.innerHTML = `
+                                <div class="cart-item-info">
+                                    <div class="cart-item-name">${item.name}</div>
+                                    <div class="cart-item-options">
+                                        ${item.size} (+¥${item.sizePrice.toFixed(2)}) |
+                                        ${item.ice} | ${item.sugar}
+                                    </div>
+                                    <div class="cart-item-price">¥${item.totalPrice.toFixed(2)}</div>
+                                </div>
+                                <div class="cart-item-actions">
+                                    <button class="cart-item-btn edit" data-index="${index}">修改</button>
+                                    <button class="cart-item-btn delete" data-index="${index}">删除</button>
+                                </div>
+                            `;
+                            cartBody.appendChild(cartItem);
+                        });
+
+                        // 更新购物车总价
+                        const total = orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
+                        cartTotalPrice.textContent = total.toFixed(2);
+                    }
+
+                    // 更新订单总价
+                    function updateOrderTotal() {
+                        totalPrice = orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
+                        totalPriceElement.textContent = totalPrice.toFixed(2);
+                    }
+
+                    // 事件监听
+                    document.addEventListener('click', function(e) {
+                        // 点击加入订单按钮
+                        if (e.target.classList.contains('order-btn')) {
+                            const teaName = e.target.dataset.tea;
+                            const teaPrice = parseFloat(e.target.dataset.price);
+                            showOptionsModal(teaName, teaPrice);
+                        }
+
+                        // 点击选项
+                        if (e.target.classList.contains('option-item') && !e.target.classList.contains('disabled')) {
+                            const type = e.target.dataset.type;
+                            const value = e.target.dataset.value;
+                            const price = parseFloat(e.target.dataset.price || 0);
+
+                            // 更新当前选择
+                            currentTea[type] = value;
+                            if (type === 'size') {
+                                currentTea.sizePrice = price;
+                                // 更新显示价格 = 基础价格 + 杯型加价
+                                modalTeaPrice.textContent = `¥${(currentTea.basePrice + price).toFixed(2)}`;
+                            } else if (type === 'base') {
+                                currentTea.basePrice = price;
+                            }
+
+                            // 更新UI
+                            document.querySelectorAll(`.option-item[data-type="${type}"]`).forEach(item => {
+                                item.classList.remove('selected');
+                            });
+                            e.target.classList.add('selected');
+
+                            updateDefaultOptionsDisplay();
+                        }
+
+                        // 点击收藏按钮
+                        if (e.target === favoriteBtn) {
+                            isFavorite = !isFavorite;
+                            favoriteBtn.classList.toggle('active', isFavorite);
+                        }
+
+                        // 点击关闭按钮
+                        if (e.target === closeOptionsModal || e.target === optionsModal) {
+                            closeModal();
+                        }
+
+                        // 点击查看购物车按钮
+                        if (e.target === viewCartBtn) {
+                            showCartModal();
+                        }
+
+                        // 点击关闭购物车按钮
+                        if (e.target === closeCartModal) {
+                            closeCartModalFunc();
+                        }
+
+                        // 点击删除商品按钮
+                        if (e.target.classList.contains('delete')) {
+                            const index = e.target.dataset.index;
+                            orderItems.splice(index, 1);
+                            updateCartDisplay();
+                            updateOrderTotal();
+                        }
+
+                        // 点击修改商品按钮
+                        if (e.target.classList.contains('edit')) {
+                            const index = e.target.dataset.index;
+                            const item = orderItems[index];
+
+                            // 显示选项弹窗
+                            showOptionsModal(item.name, item.basePrice);
+
+                            // 预填充原有选项
+                            currentTea = {
+                                name: item.name,
+                                basePrice: item.basePrice,
+                                size: item.size,
+                                sizePrice: item.sizePrice,
+                                ice: item.ice,
+                                sugar: item.sugar,
+                                base: item.base,
+                                isEditMode: true,
+                                editIndex: index
+                            };
+
+                            // 设置UI选中状态
+                            setTimeout(() => {
+                                document.querySelectorAll('.option-item').forEach(item => {
+                                    const type = item.dataset.type;
+                                    const value = item.dataset.value;
+                                    if (currentTea[type] === value) {
+                                        item.classList.add('selected');
+                                    }
+                                });
+
+                                // 更新显示价格
+                                modalTeaPrice.textContent = `¥${(currentTea.basePrice + currentTea.sizePrice).toFixed(2)}`;
+                                defaultOptions.textContent = `${currentTea.size} / ${currentTea.ice} / ${currentTea.sugar}`;
+                            }, 50);
+
+                            // 关闭购物车
+                            closeCartModalFunc();
+                        }
+                    });
+
+                    // 确认选项
+                    confirmOptions.addEventListener('click', function() {
+                        const totalPrice = currentTea.basePrice + currentTea.sizePrice;
+
+                        if (currentTea.isEditMode) {
+                            // 更新已有商品
+                            orderItems[currentTea.editIndex] = {
+                                name: currentTea.name,
+                                basePrice: currentTea.basePrice,
+                                size: currentTea.size,
+                                sizePrice: currentTea.sizePrice,
+                                ice: currentTea.ice,
+                                sugar: currentTea.sugar,
+                                base: currentTea.base,
+                                totalPrice: totalPrice,
+                                isFavorite: isFavorite
+                            };
+                        } else {
+                            // 添加新商品
+                            orderItems.push({
+                                name: currentTea.name,
+                                basePrice: currentTea.basePrice,
+                                size: currentTea.size,
+                                sizePrice: currentTea.sizePrice,
+                                ice: currentTea.ice,
+                                sugar: currentTea.sugar,
+                                base: currentTea.base,
+                                totalPrice: totalPrice,
+                                isFavorite: isFavorite
+                            });
+                        }
+
+                        // 更新总价
+                        updateOrderTotal();
+
+                        // 显示添加成功的反馈
+                        addedNotification.textContent = `${currentTea.name} ${currentTea.isEditMode ? '已更新' : '已添加'}`;
+                        addedNotification.classList.add('show');
+                        setTimeout(() => {
+                            addedNotification.classList.remove('show');
+                        }, 2000);
+
+                        closeModal();
+                    });
+
+                    // 结算按钮
+                    function checkout() {
+                        if (orderItems.length === 0) {
+                            alert('请先添加商品到订单');
+                        } else {
+                            // 生成订单详情
+                            let orderDetails = '订单详情:\n\n';
+                            orderItems.forEach(item => {
+                                orderDetails += `✓ ${item.name}\n`;
+                                orderDetails += `  杯型: ${item.size} (+¥${item.sizePrice.toFixed(2)})\n`;
+                                orderDetails += `  冰度: ${item.ice}\n`;
+                                orderDetails += `  甜度: ${item.sugar}\n`;
+                                orderDetails += `  基底: ${item.base}\n`;
+                                orderDetails += `  价格: ¥${item.totalPrice.toFixed(2)}\n\n`;
+                            });
+
+                            orderDetails += `总价: ¥${totalPrice.toFixed(2)}`;
+
+                            // 提交到后端
+                            fetch('/api/order', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    items: orderItems,
+                                    total: totalPrice
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    alert('订单提交成功！\n订单号: ' + data.order_id + '\n\n' + orderDetails);
+                                    // 清空订单
+                                    orderItems = [];
+                                    totalPrice = 0;
+                                    document.getElementById('totalPrice').textContent = '0';
+                                    updateCartDisplay();
+                                } else {
+                                    alert('订单提交失败: ' + data.message);
+                                }
+                            })
+                            .catch(error => {
+                                alert('订单提交失败: ' + error.message);
+                            });
+                        }
+                    }
+
+                    // 结算按钮事件
+                    checkoutBtn.addEventListener('click', checkout);
+                    cartCheckoutBtn.addEventListener('click', function() {
+                        closeCartModalFunc();
+                        checkout();
+                    });
+                })
+                .catch(error => {
+                    console.error('获取菜单数据失败:', error);
+                    alert('加载菜单失败，请刷新页面重试');
+                });
+        });
+    </script>
 </body>
 </html>
